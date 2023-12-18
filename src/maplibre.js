@@ -1,45 +1,17 @@
 import 'maplibre-gl/dist/maplibre-gl.css';
 import maplibregl from 'maplibre-gl';
 
-// const map = new maplibregl.Map({
-//   container: 'map',
-//   style: 'https://demotiles.maplibre.org/style.json', // stylesheet location
-//   center: [0, 0], // starting position [lng, lat]
-//   zoom: 1 // starting zoom
-// });
+maplibregl.setRTLTextPlugin(
+  'https://unpkg.com/@mapbox/mapbox-gl-rtl-text@0.2.3/mapbox-gl-rtl-text.min.js',
+  null,
+  true // Lazy load the plugin
+);
 
-// const map = new maplibregl.Map({
-//     container: 'map',
-//     style: {
-//         version: 8,
-//         sources: {
-//             MIERUNEMAP: {
-//                 type: 'raster',
-//                 tiles: ['https://tile.mierune.co.jp/mierune_mono/{z}/{x}/{y}.png'],
-//                 tileSize: 256,
-//                 attribution:
-//                     "Maptiles by <a href='http://mierune.co.jp/' target='_blank'>MIERUNE</a>, under CC BY. Data by <a href='http://osm.org/copyright' target='_blank'>OpenStreetMap</a> contributors, under ODbL.",
-//             },
-//         },
-//         layers: [
-//             {
-//                 id: 'MIERUNEMAP',
-//                 type: 'raster',
-//                 source: 'MIERUNEMAP',
-//                 minzoom: 0,
-//                 maxzoom: 18,
-//             },
-//         ],
-//     },
-//     center: [139.767, 35.681],
-//     zoom: 11,
-// });
-
-// https://maplibre.org/maplibre-gl-js-docs/example/map-tiles/
 const map = new maplibregl.Map({
   container: 'map', // container id
   style: {
     version: 8,
+    glyphs: '../public/fonts/{fontstack}/{range}.pbf',
     sources: {
       'raster-tiles': {
         type: 'raster',
@@ -60,14 +32,54 @@ const map = new maplibregl.Map({
     ],
   },
   center: [0, 0], // starting position
-  zoom: 1, // starting zoom
+  zoom: 1.5, // starting zoom
 });
 
-// Maptiler
-// https://cloud.maptiler.com/maps/basic-v2/
-// const map = new maplibregl.Map({
-//   container: 'map', // container id
-//   style: "https://api.maptiler.com/maps/basic-v2/style.json?key=mkQnG7lesIRZYYnwOLiz",
-//   center: [-74.5, 40], // starting position
-//   zoom: 2 // starting zoom
-// });
+// https://maplibre.org/maplibre-gl-js-docs/example/add-a-marker/
+const marker = new maplibregl.Marker({
+  color: 'red',
+})
+  .setLngLat([12.550343, 55.665957])
+  .addTo(map);
+
+map.on('load', () => {
+  // Core idea here: https://maplibre.org/maplibre-gl-js-docs/example/geojson-line/
+  // Then for circles https://maplibre.org/maplibre-style-spec/layers/#circle
+  map.addSource('our-source', {
+    type: 'geojson',
+    data: {
+      type: 'FeatureCollection',
+      features: [
+        {
+          type: 'Feature',
+          properties: {},
+          geometry: {
+            type: 'Point',
+            coordinates: [31.235726, 30.044386],
+          },
+        },
+      ],
+    },
+  });
+
+  map.addLayer({
+    id: 'our-circle-layer',
+    type: 'circle',
+    source: 'our-source',
+  });
+
+  // Adding some text instead ("symbol")
+  // https://maplibre.org/maplibre-style-spec/layers/#symbol
+  map.addLayer({
+    id: 'our-symbol-layer',
+    type: 'symbol',
+    source: 'our-source',
+    layout: {
+      'text-field': 'مرحبا, fag',
+      'text-font': ['Noto-Sans-Regular'],
+    },
+    paint: {
+      'text-color': 'red',
+    },
+  });
+});

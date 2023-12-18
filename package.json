@@ -13,6 +13,7 @@
     "vite": "^5.0.8"
   },
   "dependencies": {
+    "@mapbox/mapbox-gl-rtl-text": "^0.2.3",
     "leaflet": "^1.9.4",
     "maplibre-gl": "^3.6.2"
   }
