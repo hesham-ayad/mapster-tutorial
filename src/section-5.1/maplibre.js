@@ -1,6 +1,10 @@
 import 'maplibre-gl/dist/maplibre-gl.css';
 import maplibregl from 'maplibre-gl';
 
+const popUpElement = document.createElement('div');
+popUpElement.textContent = 'i am a pop up';
+
+// Map stuff
 maplibregl.setRTLTextPlugin(
   'https://unpkg.com/@mapbox/mapbox-gl-rtl-text@0.2.3/mapbox-gl-rtl-text.min.js',
   null,
@@ -35,15 +39,24 @@ const map = new maplibregl.Map({
   zoom: 1.5, // starting zoom
 });
 
+const popup = new maplibregl.Popup();
+
+// pop up open by defualt
+// const popup = new maplibregl.Popup({ closeOnClick: false })
+//   .setLngLat([-96, 37.8])
+//   .setHTML('<h1>Random popup!</h1>')
+//   .addTo(map);
+
 // https://maplibre.org/maplibre-gl-js-docs/example/add-a-marker/
 const marker = new maplibregl.Marker({
   color: 'red',
 })
-  .setLngLat([12.550343, 55.665957])
+  .setLngLat([29.29481813011833, 29.83805971876329])
+  .setPopup(new maplibregl.Popup().setDOMContent(popUpElement))
   .addTo(map);
 
 map.on('load', () => {
-  // Core idea here: https://maplibre.org/maplibre-gl-js-docs/example/geojson-line/
+  // Core idea here: https://maplibre.org/maplibre-gl-js-docs/example/geojson-line
   // Then for circles https://maplibre.org/maplibre-style-spec/layers/#circle
   map.addSource('our-source', {
     type: 'geojson',
@@ -183,9 +196,62 @@ map.on('load', () => {
     },
   });
 
+  // pop ups
+  // map.on('click', (e) => {
+  //   popup
+  //     .setLngLat(e.lngLat)
+  //     .setHTML(`You clicked the map at ${e.lngLat.toString()}`)
+  //     .addTo(map);
+  // });
+
+  // map.on('mousemove', (e) => {
+  //   popup
+  //     .setLngLat(e.lngLat)
+  //     .setHTML(`You moved the mouse at ${e.lngLat.toString()}`)
+  //     .addTo(map);
+  // });
+
   map.addControl(
     new maplibregl.NavigationControl({
       visualizePitch: true,
     })
   );
+
+  map.addSource('polygon', {
+    type: 'geojson',
+    data: popUpPolygonGeoJSON,
+  });
+  map.addLayer({
+    id: 'polygon-layer',
+    type: 'fill',
+    source: 'polygon',
+  });
+
+  map.on('click', 'polygon-layer', (e) => {
+    popup.setLngLat(e.lngLat).setHTML('You clicked the polygon!').addTo(map);
+  });
+
+  // You'd do the same pattern for a line :)
 });
+
+const popUpPolygonGeoJSON = {
+  type: 'FeatureCollection',
+  features: [
+    {
+      type: 'Feature',
+      properties: {},
+      geometry: {
+        coordinates: [
+          [
+            [-103.16190973856989, 43.69530791770973],
+            [-103.16190973856989, 36.40609683120665],
+            [-92.9706873438928, 36.40609683120665],
+            [-92.9706873438928, 43.69530791770973],
+            [-103.16190973856989, 43.69530791770973],
+          ],
+        ],
+        type: 'Polygon',
+      },
+    },
+  ],
+};
