@@ -1,8 +1,19 @@
 import 'maplibre-gl/dist/maplibre-gl.css';
 import maplibregl from 'maplibre-gl';
 
-const popUpElement = document.createElement('div');
-popUpElement.textContent = 'i am a pop up';
+const popUpEl = document.createElement('div');
+
+const popUpDiaBtn = document.createElement('button');
+popUpDiaBtn.setAttribute('type', 'button');
+popUpDiaBtn.setAttribute('id', 'popup-dia-btn');
+popUpDiaBtn.textContent = 'open pop up dialog';
+
+const popUpDiaEl = document.createElement('dialog');
+popUpDiaEl.setAttribute('id', 'popup-dia');
+
+
+popUpEl.appendChild(popUpDiaBtn);
+popUpEl.appendChild(popUpDiaEl);
 
 // Map stuff
 maplibregl.setRTLTextPlugin(
@@ -39,7 +50,7 @@ const map = new maplibregl.Map({
   zoom: 1.5, // starting zoom
 });
 
-const popup = new maplibregl.Popup();
+const popup = new maplibregl.Popup({ closeOnClick: false });
 
 // pop up open by defualt
 // const popup = new maplibregl.Popup({ closeOnClick: false })
@@ -52,7 +63,7 @@ const marker = new maplibregl.Marker({
   color: 'red',
 })
   .setLngLat([29.29481813011833, 29.83805971876329])
-  .setPopup(new maplibregl.Popup().setDOMContent(popUpElement))
+  .setPopup(new maplibregl.Popup().setDOMContent(popUpEl))
   .addTo(map);
 
 map.on('load', () => {
@@ -197,12 +208,15 @@ map.on('load', () => {
   });
 
   // pop ups
-  // map.on('click', (e) => {
-  //   popup
-  //     .setLngLat(e.lngLat)
-  //     .setHTML(`You clicked the map at ${e.lngLat.toString()}`)
-  //     .addTo(map);
-  // });
+  map.on('click', (e) => {
+    popup.setLngLat(e.lngLat).setDOMContent(popUpEl).addTo(map);
+
+    document.getElementById('popup-dia-btn')?.addEventListener('click', () => {
+      console.log('hello');
+      popUpDiaEl.textContent = `you clicked on${e.lngLat.toString()}`;
+      document.getElementById('popup-dia')?.showModal();
+    });
+  });
 
   // map.on('mousemove', (e) => {
   //   popup
